@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react"
 import type { Checkout, Payment, Pickup } from "../types"
 import { cn } from "../utils/cn"
+import { hasErrors, validateCheckout } from "../utils/validation"
+import { FieldErrors } from "./FieldErrors"
 
 type CheckoutFormProps = {
     orderEmpty: boolean
@@ -20,6 +22,9 @@ const emptyCheckout: Checkout = {
 
 export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
     const [form, setForm] = useState<Checkout>(emptyCheckout)
+    const [submitted, setSubmitted] = useState(false)
+
+    const errors = validateCheckout(form)
 
     function updateText(field: "nome" | "classe" | "note", value: string) {
         setForm(prev => ({ ...prev, [field]: value }))
@@ -27,6 +32,8 @@ export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault()
+        setSubmitted(true)
+        if (hasErrors(errors)) return
         onSubmit(form)
     }
 
@@ -40,6 +47,7 @@ export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
                 onChange={e => updateText("nome", e.target.value)}
                 className="bg-gray-200 px-5 py-3 rounded-full"
             />
+            {submitted && <FieldErrors errors={errors.nome} />}
 
             <input
                 placeholder="Classe (es. 4B)"
@@ -47,6 +55,7 @@ export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
                 onChange={e => updateText("classe", e.target.value)}
                 className="bg-gray-200 px-5 py-3 rounded-full"
             />
+            {submitted && <FieldErrors errors={errors.classe} />}
 
             <div className="flex gap-3">
                 {pickups.map(pickup => (
@@ -81,6 +90,7 @@ export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
                 rows={3}
                 className="bg-gray-200 px-5 py-3 rounded-2xl"
             />
+            {submitted && <FieldErrors errors={errors.note} />}
 
             <button
                 type="submit"
