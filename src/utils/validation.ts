@@ -1,17 +1,28 @@
 import type { Checkout } from "../types"
+import { formatPrice } from "./formatPrice"
 
 export const MAX_NOTE_LENGTH = 100
+export const MIN_CARD_TOTAL = 3
 
 export type CheckoutErrors = {
     nome: string[]
     classe: string[]
     note: string[]
+    pagamento: string[]
+    ordine: string[]
 }
 
-export function validateCheckout(checkout: Checkout): CheckoutErrors {
+type ValidationContext = {
+    total: number
+    orderEmpty: boolean
+}
+
+export function validateCheckout(checkout: Checkout, context: ValidationContext): CheckoutErrors {
     const nome: string[] = []
     const classe: string[] = []
     const note: string[] = []
+    const pagamento: string[] = []
+    const ordine: string[] = []
 
     const name = checkout.nome.trim()
     if (name === "") {
@@ -31,7 +42,15 @@ export function validateCheckout(checkout: Checkout): CheckoutErrors {
         note.push(`Le note possono avere al massimo ${MAX_NOTE_LENGTH} caratteri`)
     }
 
-    return { nome, classe, note }
+    if (checkout.pagamento === "carta" && context.total < MIN_CARD_TOTAL) {
+        pagamento.push(`Con la carta l'importo minimo è ${formatPrice(MIN_CARD_TOTAL)}`)
+    }
+
+    if (context.orderEmpty) {
+        ordine.push("L'ordine è vuoto")
+    }
+
+    return { nome, classe, note, pagamento, ordine }
 }
 
 export function hasErrors(errors: CheckoutErrors): boolean {

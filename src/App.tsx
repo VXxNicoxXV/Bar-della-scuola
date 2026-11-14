@@ -59,8 +59,7 @@ function App() {
                 <p className="p-4 rounded-2xl bg-green-100 text-green-900 font-bold">{message}</p>
             )}
 
-            <CheckoutForm key={formKey} orderEmpty={order.length === 0} onSubmit={confirmOrder} />
-        </div>
+            <CheckoutForm key={formKey} total={total} orderEmpty={order.length === 0} onSubmit={confirmOrder} />        </div>
     )
 }
 

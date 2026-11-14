@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react"
 import type { Checkout, Payment, Pickup } from "../types"
 import { cn } from "../utils/cn"
-import { hasErrors, validateCheckout } from "../utils/validation"
+import { hasErrors, MAX_NOTE_LENGTH, validateCheckout } from "../utils/validation"
 import { FieldErrors } from "./FieldErrors"
 
 type CheckoutFormProps = {
+    total: number
     orderEmpty: boolean
     onSubmit: (checkout: Checkout) => void
 }
@@ -20,11 +21,11 @@ const emptyCheckout: Checkout = {
     note: "",
 }
 
-export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
+export function CheckoutForm({ total, orderEmpty, onSubmit }: CheckoutFormProps) {
     const [form, setForm] = useState<Checkout>(emptyCheckout)
     const [submitted, setSubmitted] = useState(false)
 
-    const errors = validateCheckout(form)
+    const errors = validateCheckout(form, { total, orderEmpty })
 
     function updateText(field: "nome" | "classe" | "note", value: string) {
         setForm(prev => ({ ...prev, [field]: value }))
@@ -82,6 +83,7 @@ export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
                     >{payment}</button>
                 ))}
             </div>
+            {submitted && <FieldErrors errors={errors.pagamento} />}
 
             <textarea
                 placeholder="Note (facoltative)"
@@ -90,6 +92,9 @@ export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
                 rows={3}
                 className="bg-gray-200 px-5 py-3 rounded-2xl"
             />
+            <p className={cn("text-sm text-right text-gray-500", {
+                "text-red-600 font-bold": form.note.length > MAX_NOTE_LENGTH,
+            })}>{form.note.length}/{MAX_NOTE_LENGTH}</p>
             {submitted && <FieldErrors errors={errors.note} />}
 
             <button
@@ -97,6 +102,8 @@ export function CheckoutForm({ orderEmpty, onSubmit }: CheckoutFormProps) {
                 disabled={orderEmpty}
                 className="self-start px-6 py-3 rounded-full bg-blue-500 text-white disabled:opacity-40"
             >Conferma ordine</button>
+            {orderEmpty && <p className="text-sm text-gray-500 px-2">Aggiungi almeno un prodotto per confermare.</p>}
+            {submitted && <FieldErrors errors={errors.ordine} />}
         </form>
     )
 }
