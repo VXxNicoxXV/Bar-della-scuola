@@ -1,6 +1,11 @@
+import { Menu } from "./components/Menu"
+
 function App() {
     return (
-        <h1 className="text-4xl font-bold text-center p-6">Il bar della scuola</h1>
+        <div className="max-w-xl mx-auto p-6 flex flex-col gap-8">
+            <h1 className="text-4xl font-bold text-center">Il bar della scuola</h1>
+            <Menu />
+        </div>
     )
 }
 
