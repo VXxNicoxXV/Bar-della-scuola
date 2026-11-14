@@ -1,13 +1,16 @@
 import { menu } from "../data/menu"
 import type { OrderItem } from "../types"
 import { formatPrice } from "../utils/formatPrice"
+import { MAX_QUANTITY } from "../utils/order"
 
 type OrderProps = {
     order: OrderItem[]
     total: number
+    onIncrease: (id: number) => void
+    onDecrease: (id: number) => void
 }
 
-export function Order({ order, total }: OrderProps) {
+export function Order({ order, total, onIncrease, onDecrease }: OrderProps) {
     return (
         <section>
             <h2 className="text-2xl font-bold mb-3">Il tuo ordine</h2>
@@ -21,7 +24,18 @@ export function Order({ order, total }: OrderProps) {
                     return (
                         <div key={item.productId} className="flex justify-between items-center">
                             <p className="font-bold flex-1">{product.name}</p>
-                            <p className="w-12 text-center">x{item.quantity}</p>
+                            <div className="flex items-center gap-3 mr-4">
+                                <button
+                                    className="w-9 h-9 rounded-full bg-gray-200"
+                                    onClick={() => onDecrease(item.productId)}
+                                >−</button>
+                                <span className="w-4 text-center">{item.quantity}</span>
+                                <button
+                                    className="w-9 h-9 rounded-full bg-gray-200 disabled:opacity-40"
+                                    disabled={item.quantity >= MAX_QUANTITY}
+                                    onClick={() => onIncrease(item.productId)}
+                                >+</button>
+                            </div>
                             <p className="w-24 text-right">{formatPrice(product.price * item.quantity)}</p>
                         </div>
                     )

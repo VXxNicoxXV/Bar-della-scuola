@@ -1,6 +1,8 @@
 import { menu } from "../data/menu"
 import type { OrderItem } from "../types"
 
+export const MAX_QUANTITY = 5
+
 export function getTotal(order: OrderItem[]): number {
     const total = order.reduce((sum, item) => {
         const product = menu.find(p => p.id === item.productId)
