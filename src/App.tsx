@@ -5,16 +5,21 @@ import { Order } from "./components/Order"
 import { PendingOrders } from "./components/PendingOrders"
 import type { Checkout, OrderItem, PendingOrder } from "./types"
 import { formatPrice } from "./utils/formatPrice"
-import { getTotal, MAX_QUANTITY, MAX_RECREATION_ORDERS } from "./utils/order"
+import {
+    applyDiscount, getTotal, isDiscountValid, MAX_QUANTITY, MAX_RECREATION_ORDERS,
+} from "./utils/order"
 
 function App() {
     const [order, setOrder] = useState<OrderItem[]>([])
     const [pending, setPending] = useState<PendingOrder[]>([])
+    const [discountCode, setDiscountCode] = useState("")
     const [message, setMessage] = useState("")
     // cambiando la key il form viene ricreato, quindi si svuota
     const [formKey, setFormKey] = useState(0)
 
     const total = getTotal(order)
+    const discountValid = isDiscountValid(discountCode)
+    const finalTotal = discountValid ? applyDiscount(total) : total
     const recreationOrders = pending.filter(o => o.checkout.ritiro === "a ricreazione").length
     const recreationFull = recreationOrders >= MAX_RECREATION_ORDERS
 
@@ -46,13 +51,14 @@ function App() {
 
     function confirmOrder(checkout: Checkout) {
         setMessage(
-            `Ordine per ${checkout.nome} (${checkout.classe}), ritiro ${checkout.ritiro}, ${checkout.pagamento}: ${formatPrice(total)}`
+            `Ordine per ${checkout.nome} (${checkout.classe}), ritiro ${checkout.ritiro}, ${checkout.pagamento}: ${formatPrice(finalTotal)}`
         )
         setPending(prev => [
             ...prev,
-            { id: Math.max(0, ...prev.map(o => o.id)) + 1, checkout, items: order, total },
+            { id: Math.max(0, ...prev.map(o => o.id)) + 1, checkout, items: order, total: finalTotal },
         ])
         setOrder([])
+        setDiscountCode("")
         setFormKey(prev => prev + 1)
     }
 
@@ -63,6 +69,10 @@ function App() {
             <Order
                 order={order}
                 total={total}
+                finalTotal={finalTotal}
+                discountCode={discountCode}
+                discountValid={discountValid}
+                onDiscountCodeChange={setDiscountCode}
                 onIncrease={addProduct}
                 onDecrease={decreaseProduct}
             />
@@ -73,7 +83,7 @@ function App() {
 
             <CheckoutForm
                 key={formKey}
-                total={total}
+                total={finalTotal}
                 orderEmpty={order.length === 0}
                 recreationFull={recreationFull}
                 onSubmit={confirmOrder}

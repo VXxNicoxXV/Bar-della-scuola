@@ -6,11 +6,18 @@ import { MAX_QUANTITY } from "../utils/order"
 type OrderProps = {
     order: OrderItem[]
     total: number
+    finalTotal: number
+    discountCode: string
+    discountValid: boolean
+    onDiscountCodeChange: (code: string) => void
     onIncrease: (id: number) => void
     onDecrease: (id: number) => void
 }
 
-export function Order({ order, total, onIncrease, onDecrease }: OrderProps) {
+export function Order({
+    order, total, finalTotal, discountCode, discountValid,
+    onDiscountCodeChange, onIncrease, onDecrease,
+}: OrderProps) {
     return (
         <section>
             <h2 className="text-2xl font-bold mb-3">Il tuo ordine</h2>
@@ -42,9 +49,26 @@ export function Order({ order, total, onIncrease, onDecrease }: OrderProps) {
                 })}
             </div>
 
-            <p className="mt-4 pt-4 border-t border-gray-300 text-right text-xl font-bold">
-                Totale: {formatPrice(total)}
-            </p>
+            <div className="mt-4 pt-4 border-t border-gray-300 flex flex-col items-end gap-1">
+                {discountValid && (
+                    <>
+                        <p>Subtotale: {formatPrice(total)}</p>
+                        <p className="text-green-700">Sconto 10%: −{formatPrice(total - finalTotal)}</p>
+                    </>
+                )}
+                <p className="text-xl font-bold">Totale: {formatPrice(finalTotal)}</p>
+            </div>
+
+            <input
+                placeholder="Codice sconto"
+                value={discountCode}
+                onChange={e => onDiscountCodeChange(e.target.value)}
+                className="mt-4 w-full bg-gray-200 px-5 py-3 rounded-full"
+            />
+            {discountCode.trim() !== "" && !discountValid && (
+                <p className="text-sm text-red-600 px-2 mt-1">Codice sconto non valido</p>
+            )}
+            {discountValid && <p className="text-sm text-green-700 px-2 mt-1">Codice applicato!</p>}
         </section>
     )
 }
