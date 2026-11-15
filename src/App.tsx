@@ -2,12 +2,14 @@ import { useState } from "react"
 import { CheckoutForm } from "./components/CheckoutForm"
 import { Menu } from "./components/Menu"
 import { Order } from "./components/Order"
-import type { Checkout, OrderItem } from "./types"
+import { PendingOrders } from "./components/PendingOrders"
+import type { Checkout, OrderItem, PendingOrder } from "./types"
 import { formatPrice } from "./utils/formatPrice"
 import { getTotal, MAX_QUANTITY } from "./utils/order"
 
 function App() {
     const [order, setOrder] = useState<OrderItem[]>([])
+    const [pending, setPending] = useState<PendingOrder[]>([])
     const [message, setMessage] = useState("")
     // cambiando la key il form viene ricreato, quindi si svuota
     const [formKey, setFormKey] = useState(0)
@@ -36,10 +38,18 @@ function App() {
         )
     }
 
+    function markAsPickedUp(id: number) {
+        setPending(prev => prev.filter(o => o.id !== id))
+    }
+
     function confirmOrder(checkout: Checkout) {
         setMessage(
             `Ordine per ${checkout.nome} (${checkout.classe}), ritiro ${checkout.ritiro}, ${checkout.pagamento}: ${formatPrice(total)}`
         )
+        setPending(prev => [
+            ...prev,
+            { id: Math.max(0, ...prev.map(o => o.id)) + 1, checkout, items: order, total },
+        ])
         setOrder([])
         setFormKey(prev => prev + 1)
     }
@@ -59,7 +69,10 @@ function App() {
                 <p className="p-4 rounded-2xl bg-green-100 text-green-900 font-bold">{message}</p>
             )}
 
-            <CheckoutForm key={formKey} total={total} orderEmpty={order.length === 0} onSubmit={confirmOrder} />        </div>
+            <CheckoutForm key={formKey} total={total} orderEmpty={order.length === 0} onSubmit={confirmOrder} />
+
+            <PendingOrders orders={pending} onPickedUp={markAsPickedUp} />
+        </div>
     )
 }
 

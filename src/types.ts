@@ -13,3 +13,10 @@ export type Checkout = {
     pagamento: Payment
     note: string
 }
+
+export type PendingOrder = {
+    id: number
+    checkout: Checkout
+    items: OrderItem[]
+    total: number
+}
