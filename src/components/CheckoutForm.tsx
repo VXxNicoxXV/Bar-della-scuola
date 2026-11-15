@@ -7,6 +7,7 @@ import { FieldErrors } from "./FieldErrors"
 type CheckoutFormProps = {
     total: number
     orderEmpty: boolean
+    recreationFull: boolean
     onSubmit: (checkout: Checkout) => void
 }
 
@@ -21,11 +22,11 @@ const emptyCheckout: Checkout = {
     note: "",
 }
 
-export function CheckoutForm({ total, orderEmpty, onSubmit }: CheckoutFormProps) {
+export function CheckoutForm({ total, orderEmpty, recreationFull, onSubmit }: CheckoutFormProps) {
     const [form, setForm] = useState<Checkout>(emptyCheckout)
     const [submitted, setSubmitted] = useState(false)
 
-    const errors = validateCheckout(form, { total, orderEmpty })
+    const errors = validateCheckout(form, { total, orderEmpty, recreationFull })
 
     function updateText(field: "nome" | "classe" | "note", value: string) {
         setForm(prev => ({ ...prev, [field]: value }))
@@ -63,13 +64,15 @@ export function CheckoutForm({ total, orderEmpty, onSubmit }: CheckoutFormProps)
                     <button
                         type="button"
                         key={pickup}
+                        disabled={pickup === "a ricreazione" && recreationFull}
                         onClick={() => setForm(prev => ({ ...prev, ritiro: pickup }))}
-                        className={cn("px-4 py-2 rounded-full bg-gray-300 capitalize", {
+                        className={cn("px-4 py-2 rounded-full bg-gray-300 capitalize disabled:opacity-40", {
                             "bg-blue-500 text-white": form.ritiro === pickup,
                         })}
                     >{pickup}</button>
                 ))}
             </div>
+            <FieldErrors errors={errors.ritiro} />
 
             <div className="flex gap-3">
                 {payments.map(payment => (

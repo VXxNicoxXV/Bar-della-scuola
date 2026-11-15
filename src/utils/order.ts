@@ -2,6 +2,7 @@ import { menu } from "../data/menu"
 import type { OrderItem } from "../types"
 
 export const MAX_QUANTITY = 5
+export const MAX_RECREATION_ORDERS = 3
 
 export function getTotal(order: OrderItem[]): number {
     const total = order.reduce((sum, item) => {

@@ -5,7 +5,7 @@ import { Order } from "./components/Order"
 import { PendingOrders } from "./components/PendingOrders"
 import type { Checkout, OrderItem, PendingOrder } from "./types"
 import { formatPrice } from "./utils/formatPrice"
-import { getTotal, MAX_QUANTITY } from "./utils/order"
+import { getTotal, MAX_QUANTITY, MAX_RECREATION_ORDERS } from "./utils/order"
 
 function App() {
     const [order, setOrder] = useState<OrderItem[]>([])
@@ -15,6 +15,8 @@ function App() {
     const [formKey, setFormKey] = useState(0)
 
     const total = getTotal(order)
+    const recreationOrders = pending.filter(o => o.checkout.ritiro === "a ricreazione").length
+    const recreationFull = recreationOrders >= MAX_RECREATION_ORDERS
 
     function addProduct(id: number) {
         setOrder(prev => {
@@ -69,7 +71,13 @@ function App() {
                 <p className="p-4 rounded-2xl bg-green-100 text-green-900 font-bold">{message}</p>
             )}
 
-            <CheckoutForm key={formKey} total={total} orderEmpty={order.length === 0} onSubmit={confirmOrder} />
+            <CheckoutForm
+                key={formKey}
+                total={total}
+                orderEmpty={order.length === 0}
+                recreationFull={recreationFull}
+                onSubmit={confirmOrder}
+            />
 
             <PendingOrders orders={pending} onPickedUp={markAsPickedUp} />
         </div>

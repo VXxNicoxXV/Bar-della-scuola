@@ -8,6 +8,7 @@ export type CheckoutErrors = {
     nome: string[]
     classe: string[]
     note: string[]
+    ritiro: string[]
     pagamento: string[]
     ordine: string[]
 }
@@ -15,12 +16,14 @@ export type CheckoutErrors = {
 type ValidationContext = {
     total: number
     orderEmpty: boolean
+    recreationFull: boolean
 }
 
 export function validateCheckout(checkout: Checkout, context: ValidationContext): CheckoutErrors {
     const nome: string[] = []
     const classe: string[] = []
     const note: string[] = []
+    const ritiro: string[] = []
     const pagamento: string[] = []
     const ordine: string[] = []
 
@@ -42,6 +45,10 @@ export function validateCheckout(checkout: Checkout, context: ValidationContext)
         note.push(`Le note possono avere al massimo ${MAX_NOTE_LENGTH} caratteri`)
     }
 
+    if (checkout.ritiro === "a ricreazione" && context.recreationFull) {
+        ritiro.push("Troppi ordini a ricreazione: scegli il ritiro a pranzo")
+    }
+
     if (checkout.pagamento === "carta" && context.total < MIN_CARD_TOTAL) {
         pagamento.push(`Con la carta l'importo minimo è ${formatPrice(MIN_CARD_TOTAL)}`)
     }
@@ -50,7 +57,7 @@ export function validateCheckout(checkout: Checkout, context: ValidationContext)
         ordine.push("L'ordine è vuoto")
     }
 
-    return { nome, classe, note, pagamento, ordine }
+    return { nome, classe, note, ritiro, pagamento, ordine }
 }
 
 export function hasErrors(errors: CheckoutErrors): boolean {
